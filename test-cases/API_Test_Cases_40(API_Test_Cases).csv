@@ -1,0 +1,41 @@
+Test Case ID,Module,Test Scenario,API Endpoint,Precondition,Test Steps,Test Data,Expected Status Code,Expected Result
+TC_AUTH_01,Authentication,Register with valid data,POST /users/register,None,"Send valid name, email, password",Valid JSON body,201,User created successfully with JWT token
+TC_AUTH_02,Authentication,Register without email,POST /users/register,None,Omit email field,Missing email,400,All fields are required
+TC_AUTH_03,Authentication,Register with existing email,POST /users/register,User already exists,Send existing email,Duplicate email,400,User already exists
+TC_AUTH_04,Authentication,Login with valid credentials,POST /users/login,User registered,Send correct email & password,Valid credentials,200,JWT token returned
+TC_AUTH_05,Authentication,Login with wrong password,POST /users/login,User registered,Send wrong password,Invalid password,401,Invalid email or password
+TC_AUTH_06,Authentication,Login without password,POST /users/login,None,Omit password field,Missing password,400,Email and password required
+TC_AUTH_07,Authorization,Access protected route without token,GET /users,None,Send request without Authorization header,No token,401,"Not authorized, no token"
+TC_AUTH_08,Authorization,Access protected route with valid token,GET /users,Valid login,Send request with valid Bearer token,Authorization header,200,User data returned
+TC_AUTH_09,Authorization,Access with tampered token,GET /users,Valid token available,Modify one character in token,Tampered token,401,"Not authorized, token failed"
+TC_AUTH_10,Authorization,Access with expired token,GET /users,Token expiration configured,Use expired token,Expired token,401,Token expired error
+TC_USER_01,User Management,Get all users with valid token,GET /users,Valid login,Send GET request with token,Authorization header,200,List of users returned
+TC_USER_02,User Management,Get user by valid ID,GET /users/:id,User exists,Send request with valid ID,Valid ID,200,Correct user data returned
+TC_USER_03,User Management,Get user by invalid ID,GET /users/12345,None,Send request with invalid ID format,Invalid ID,400/404,Error returned
+TC_USER_04,User Management,Update user with PUT,PUT /users/:id,Valid token,Send updated data,Updated name/email,200,User updated successfully
+TC_USER_05,User Management,Partial update with PATCH,PATCH /users/:id,Valid token,Update only name field,Partial data,200,Only specified field updated
+TC_USER_06,User Management,Update without token,PUT /users/:id,None,Send request without token,No header,401,Unauthorized error
+TC_USER_07,User Management,Delete user as admin,DELETE /users/:id,Admin login,Send delete request with admin token,Admin token,200,User deleted successfully
+TC_USER_08,User Management,Delete user as normal user,DELETE /users/:id,Role=user,Send delete request,User token,403,Not authorized for this action
+TC_ROLE_01,Role-Based Access,Admin can access admin route,DELETE /users/:id,Role=admin,Send request,Admin token,200,Access granted
+TC_ROLE_02,Role-Based Access,User cannot access admin route,DELETE /users/:id,Role=user,Send request,User token,403,Access denied
+TC_ROLE_03,Role-Based Access,Role visible after login,POST /users/login,Admin exists,Login and verify role in response,Admin login,200,Role returned correctly
+TC_ROLE_04,Role-Based Access,Role update reflected after re-login,POST /users/login,Role updated in DB,Login again,Updated role,200,New role reflected
+TC_PAGE_01,Pagination,Page 1 limit 2,GET /users?page=1&limit=2,Valid token,Send request,Query params,200,Maximum 2 records returned
+TC_PAGE_02,Pagination,Page 2 results,GET /users?page=2&limit=2,Valid token,Send request,Query params,200,Next set of records returned
+TC_PAGE_03,Pagination,Default pagination,GET /users,Valid token,Send request without params,No params,200,Default page=1 limit=5 applied
+TC_PAGE_04,Pagination,Invalid page number,GET /users?page=-1,Valid token,Send request,Invalid page,200/Handled,Graceful handling without crash
+TC_FILTER_01,Filtering,Filter by partial name,GET /users?name=rit,Valid token,Send request,Query param,200,Matching users returned
+TC_FILTER_02,Filtering,Filter with no matches,GET /users?name=xyz,Valid token,Send request,Query param,200,Empty array returned
+TC_FILTER_03,Filtering,Case insensitive filtering,GET /users?name=RIT,Valid token,Send request,Query param,200,Matching users returned
+TC_SORT_01,Sorting,Sort by createdAt desc,GET /users?sortBy=createdAt&order=desc,Valid token,Send request,Query param,200,Records sorted descending
+TC_SORT_02,Sorting,Sort by createdAt asc,GET /users?sortBy=createdAt&order=asc,Valid token,Send request,Query param,200,Records sorted ascending
+TC_SORT_03,Sorting,Invalid sort field,GET /users?sortBy=invalidField,Valid token,Send request,Invalid field,200/Handled,"No crash, handled gracefully"
+TC_SEC_01,Security,SQL injection attempt,POST /users/login,None,Send malicious string in email,admin' OR '1'='1,401,Login fails
+TC_SEC_02,Security,Extremely long input,POST /users/register,None,Send long string input,Very long text,Handled,No crash
+TC_SEC_03,Security,Invalid Authorization header format,GET /users,None,Send header without Bearer prefix,Authorization: token,401,Unauthorized
+TC_SEC_04,Security,Random string as token,GET /users,None,Send random string,Random token,401,Unauthorized
+TC_SEC_05,Security,Token without Bearer keyword,GET /users,None,Send token without Bearer,Raw token,401,Unauthorized
+TC_ERR_01,Error Handling,Access non-existing route,GET /invalidRoute,None,Send request,Invalid endpoint,404,Not Found error
+TC_ERR_02,Error Handling,Malformed JSON request,POST /users/register,None,Send invalid JSON,Malformed JSON,400,Bad request error
+TC_ERR_03,Error Handling,Database disconnected scenario,Any API,Simulated DB failure,Stop DB and send request,DB down,500,Graceful error response
