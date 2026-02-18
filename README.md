@@ -135,6 +135,4 @@ Run with coverage:
 ------------------------------------------------------------------------
 
 ## 👩‍💻 Author
-
-Backend + QA Automation hybrid project demonstrating practical API
-development and testing skills.
+Ritika Dhanda
